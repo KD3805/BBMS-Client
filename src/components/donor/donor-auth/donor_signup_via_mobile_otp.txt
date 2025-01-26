@@ -1,0 +1,346 @@
+import React, { useEffect, useState } from "react";
+import OtpInput from "../phone-otp/OtpInput";
+import { auth } from "../../config/firebase.config";
+import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
+import toast, { Toaster } from 'react-hot-toast'
+import { CgSpinner } from "react-icons/cg";
+
+const DonorSignup = () => {
+  const [showOtpInput, setShowOtpInput] = useState(false)
+  const [otp, setOtp] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [formData, setFormData] = useState({
+    Name: "",
+    DOB: "",
+    Gender: "",
+    BloodGroup: "",
+    Phone: "",
+    Email: "",
+    State: "",
+    District: "",
+    Address: "",
+    PinCode: "",
+  });
+
+  // Initialize ReCAPTCHA verifier once when the component loads
+  useEffect(() => {
+    if (document.getElementById("recaptcha-container")) {
+      initializeCaptcha();
+    } else {
+      console.error("ReCAPTCHA container not found.");
+    }
+  }, []);
+
+
+  // Function to initialize reCAPTCHA verifier
+  function initializeCaptcha() {
+    if (!window.recaptchaVerifier) {
+      try {
+        window.recaptchaVerifier = new RecaptchaVerifier(
+          auth,
+          "recaptcha-container",
+          {
+            size: "invisible",
+            callback: (response) => {
+              console.log("ReCAPTCHA verified successfully:", response);
+            },
+            "expired-callback": () => {
+              toast.error("ReCAPTCHA expired. Please try again.");
+            },
+          }
+        );
+      } catch (error) {
+        console.error("Error initializing ReCAPTCHA:", error);
+        toast.error("Failed to load ReCAPTCHA.");
+      }
+    }
+  }
+  
+
+  // Function to handle phone number validation
+  const validatePhoneNumber = () => {
+    return /^\d{10,15}$/.test(formData.Phone);
+  };
+
+  // Function to send OTP
+  const sendOtp = () => {
+    setLoading(true);
+    initializeCaptcha();
+
+    const appVerifier = window.recaptchaVerifier;
+    const formattedPhone = `+91${formData.Phone}`;  // Ensure you prepend the correct country code (e.g., +91 for India)
+
+    signInWithPhoneNumber(auth, formattedPhone, appVerifier)
+      .then((confirmationResult) => {
+        window.confirmationResult = confirmationResult;
+        setLoading(false);
+        setShowOtpInput(true);
+        toast.success("OTP has been sent successfully!");
+      })
+      .catch((error) => {
+        console.error("Error sending OTP:", error);
+        setLoading(false);
+        toast.error("Failed to send OTP. Please try again.");
+      });
+  };
+
+  // Function to verify OTP
+  const verifyOtp = () => {
+    if (!otp || otp.length !== 6) {
+      toast.error("Please enter a valid 6-digit OTP.");
+      return;
+    }
+
+    setLoading(true);
+    window.confirmationResult
+      .confirm(otp)
+      .then((result) => {
+        console.log("OTP verification successful:", result);
+        toast.success("OTP verified successfully!");
+        setLoading(false);
+        // Proceed with form submission or further steps
+      })
+      .catch((error) => {
+        console.error("Error verifying OTP:", error);
+        toast.error("Invalid OTP. Please try again.");
+        setLoading(false);
+      });
+  };
+
+  // Function to handle OTP submission
+  const handleOtpSubmit = (e) => {
+    e.preventDefault();
+    verifyOtp();
+  };
+
+  // Function to handle form submission
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+    console.log("formData:",formData)
+
+    if (!validatePhoneNumber()) {
+      toast.error("Invalid phone number. Please use the format: +1234567890");
+      return;
+    }
+
+    sendOtp();
+  };
+
+  // Function to handle form input changes
+  const handleInputChange = (e) => {
+    const { id, value } = e.target;
+    setFormData({ ...formData, [id]: value });
+  };
+
+  return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="w-full max-w-5xl bg-gray-100 p-10 rounded-xl shadow-lg">
+        <h4 className="text-3xl font-extrabold mb-10 inline-block">
+          <span className="underline decoration-4 decoration-red-500 pb-4">
+            Do
+          </span>
+          nor{" "}
+          Sign Up
+        </h4>
+
+        <Toaster toastOptions={{ duration: 4000 }} />
+        <div id="recaptcha-container"></div>
+
+        {
+          !showOtpInput ? (
+            <form onSubmit={handleFormSubmit}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 text-lg">
+                <div>
+                  <label htmlFor="Name" className="block font-bold">
+                    Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="Name"
+                    className="w-full p-2 border rounded focus:outline-none focus:ring focus:ring-blue-300"
+                    placeholder="Enter your name"
+                    value={formData.Name}
+                    onChange={handleInputChange}
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="DOB" className="block font-bold">
+                    Date of Birth <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="date"
+                    id="DOB"
+                    className="w-full p-2 border rounded focus:outline-none focus:ring focus:ring-blue-300"
+                    placeholder="Enter birth date"
+                    value={formData.DOB}
+                    onChange={handleInputChange}
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="Gender" className="block font-bold">
+                    Gender <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    id="Gender"
+                    className="w-full p-2 border rounded focus:outline-none focus:ring focus:ring-blue-300"
+                    value={formData.Gender}
+                    onChange={handleInputChange}
+                  >
+                    <option value="">Select Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+
+                <div>
+                <label htmlFor="BloodGroup" className="block font-bold">
+                  Blood Group <span className="text-red-500">*</span>
+                </label>
+                <select
+                  id="BloodGroup"
+                  className="w-full p-2 border rounded focus:outline-none focus:ring focus:ring-blue-300"
+                  value={formData.BloodGroup}
+                  onChange={handleInputChange}
+                >
+                  <option value="">-Select Blood Group-</option>
+                  <option value="AB-Ve">AB-Ve</option>
+                  <option value="AB+Ve">AB+Ve</option>
+                  <option value="A-Ve">A-Ve</option>
+                  <option value="A+Ve">A+Ve</option>
+                  <option value="B-Ve">B-Ve</option>
+                  <option value="B+Ve">B+Ve</option>
+                  <option value="Oh-Ve">Oh-Ve</option>
+                  <option value="Oh+Ve">Oh+Ve</option>
+                  <option value="O-Ve">O-Ve</option>
+                  <option value="O+Ve">O+Ve</option>
+                </select>
+              </div>
+
+                <div>
+                  <label htmlFor="Phone" className="block font-bold">
+                    Phone Number <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="Phone"
+                    className="w-full p-2 border rounded focus:outline-none focus:ring focus:ring-blue-300"
+                    placeholder="Enter phone number"
+                    value={formData.Phone}
+                    onChange={handleInputChange}
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="Email" className="block font-bold">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    id="Email"
+                    className="w-full p-2 border rounded focus:outline-none focus:ring focus:ring-blue-300"
+                    placeholder="Enter your email"
+                    value={formData.Email}
+                    onChange={handleInputChange}
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="State" className="block font-bold">
+                    State <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    id="State"
+                    className="w-full p-2 border rounded focus:outline-none focus:ring focus:ring-blue-300"
+                    value={formData.State}
+                    onChange={handleInputChange}
+                  >
+                    <option value="">Select State</option>
+                    <option value="Gujarat">Gujarat</option>
+                    <option value="Maharashtra">Maharashtra</option>
+                    <option value="Rajasthan">Rajasthan</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label htmlFor="District" className="block font-bold">
+                    District <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    id="District"
+                    className="w-full p-2 border rounded focus:outline-none focus:ring focus:ring-blue-300"
+                    value={formData.District}
+                    onChange={handleInputChange}
+                  >
+                    <option value="">Select District</option>
+                    <option value="Morbi">Morbi</option>
+                    <option value="Rajkot">Rajkot</option>
+                    <option value="Mumbai">Mumbai</option>
+                    <option value="Udaipur">Udaipur</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label htmlFor="Address" className="block font-bold">
+                    Address
+                  </label>
+                  <input
+                    type="text"
+                    id="Address"
+                    className="w-full p-2 border rounded focus:outline-none focus:ring focus:ring-blue-300"
+                    placeholder="Enter your address"
+                    value={formData.Address}
+                    onChange={handleInputChange}
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="PinCode" className="block font-bold">
+                    PinCode <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="PinCode"
+                    className="w-full p-2 border rounded focus:outline-none focus:ring focus:ring-blue-300"
+                    placeholder="Enter your pin code"
+                    value={formData.PinCode}
+                    onChange={handleInputChange}
+                  />
+                </div>
+
+              </div>
+
+              <div className="flex justify-center">
+                <button
+                  type="submit"
+                  className="bg-red-700 font-bold text-white px-6 py-2 rounded shadow hover:bg-red-800 focus:outline-none focus:ring focus:ring-pink-300"
+                >
+                  {loading ? <CgSpinner size={20} className="animate-spin" /> : "Submit"}
+                </button>
+              </div>
+            </form>
+          ) : (
+            <div className="w-full flex justify-center flex-col items-center gap-4">
+              <div className="flex flex-col justify-center items-center gap-0">
+                <p className="font-medium text-base">OTP has been sent to {formData.Phone}</p>
+                <OtpInput length={6} onOtpSubmit={setOtp} />
+              </div>
+              <div>
+                <button
+                  className="flex items-center bg-red-700 font-bold text-white px-6 py-2 rounded shadow hover:bg-red-800 focus:outline-none focus:ring focus:ring-pink-300"
+                  onClick={handleOtpSubmit}
+                >
+                  {loading ? <CgSpinner size={20} className="animate-spin" /> : "Verify OTP"}
+                </button>
+              </div>
+            </div>
+          )
+        }
+      </div>
+    </div>
+  );
+};
+
+export default DonorSignup;

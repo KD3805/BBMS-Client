@@ -1,0 +1,15 @@
+EMAIL_OTP_BACKEND_API_URL : "https://email-otp-verification-jn0x.onrender.com" 
+    - axiosInstance.js
+    - vite.congig.js
+
+EMAIL_OTP_BACKEND_API_URL : "http://localhost:5173"
+    - app.js
+
+
+ASP.NET_API_BACKEND_URL : "https://localhost:7009"
+    - axiosInstance.js
+    - vite.congig.js
+
+FRONTEND_URL_FOR_ASP.NET : "http://localhost:5173"
+    - program.cs
+

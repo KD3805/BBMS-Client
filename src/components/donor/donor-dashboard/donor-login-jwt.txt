@@ -1,0 +1,591 @@
+---------------- BACKEND -----------------------
+
+DonorController.cs :
+
+using BBMS_WebAPI.Data;
+using BBMS_WebAPI.Models;
+using Microsoft.AspNetCore.Mvc;
+
+namespace BBMS_WebAPI.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class DonorController : ControllerBase
+    {
+        private readonly DonorRepository _donorRepository;
+
+        public DonorController(IConfiguration configuration)
+        {
+            _donorRepository = new DonorRepository(configuration);
+        }
+
+        #region GetAll
+        [HttpGet]
+        public IActionResult GetAllDonors()
+        {
+            var donors = _donorRepository.GetAll();
+            if (donors == null || donors.Count == 0)
+                return NotFound("No donors found.");
+
+            return Ok(donors);
+        }
+        #endregion
+
+        #region GetById
+        [HttpGet("{id:int}")]
+        public IActionResult GetDonorById(int id)
+        {
+            var donor = _donorRepository.GetById(id);
+            if (donor == null)
+                return NotFound($"Donor with ID {id} not found.");
+
+            return Ok(donor);
+        }
+        #endregion
+
+        #region Insert
+        [HttpPost]
+        public IActionResult InsertDonor([FromBody] DonorModel donorModel)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var isInserted = _donorRepository.Insert(donorModel);
+            if (isInserted)
+                return CreatedAtAction(nameof(GetDonorById), new { id = donorModel.DonorID }, donorModel);
+
+            return StatusCode(StatusCodes.Status500InternalServerError, "Error inserting donor.");
+        }
+        #endregion
+
+        #region Update
+        [HttpPut("{id:int}")]
+        public IActionResult UpdateDonor(int id, [FromBody] DonorModel donorModel)
+        {
+            if (id != donorModel.DonorID)
+                return BadRequest("Donor ID mismatch.");
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var donor = _donorRepository.GetById(id);
+            if (donor == null)
+                return NotFound($"Donor with ID {id} not found.");
+
+            var isUpdated = _donorRepository.Update(donorModel);
+            if (isUpdated)
+                return NoContent();
+
+            return StatusCode(StatusCodes.Status500InternalServerError, "Error updating donor.");
+        }
+        #endregion
+
+        #region Delete
+        [HttpDelete("{id:int}")]
+        public IActionResult DeleteDonor(int id)
+        {
+            var donor = _donorRepository.GetById(id);
+            if (donor == null)
+                return NotFound($"Donor with ID {id} not found.");
+
+            var isDeleted = _donorRepository.Delete(id);
+            if (isDeleted)
+                return NoContent();
+
+            return StatusCode(StatusCodes.Status500InternalServerError, "Error deleting donor.");
+        }
+        #endregion
+
+        #region GetByEmail
+        [HttpPost("Email")]
+        public IActionResult GetDonorByEmail([FromBody] LoginRequestModel rq)
+        {
+            if (string.IsNullOrWhiteSpace(rq.Email))
+                return BadRequest("Email is required.");
+
+            var donor = _donorRepository.GetByEmail(rq.Email);
+            if (donor == null)
+            {
+                return Ok(new
+                {
+                    exists = false,
+                    message = "Donor with the provided email not found."
+                });
+            }
+
+            return Ok(new
+            {
+                message = "Donor with the given email already exists.",
+                exists = true
+            });
+        }
+        #endregion
+
+        #region DropDown
+        [HttpGet("DropDown")]
+        public IActionResult GetDonorDropDown()
+        {
+            var donors = _donorRepository.GetDonorDropDown();
+            if (donors == null || donors.Count == 0)
+                return NotFound("No donors found for dropdown.");
+
+            return Ok(donors);
+        }
+        #endregion
+    }
+}
+
+OtpController.cs :
+
+using BBMS_WebAPI.Data;
+using BBMS_WebAPI.Services;
+using BBMS_WebAPI.Utilities;
+using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
+
+namespace BBMS_WebAPI.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class OtpController : ControllerBase
+    {
+        private readonly OtpService _otpService;
+        private readonly EmailHelper _emailHelper;
+        private readonly DonorRepository _donorRepository;
+        private readonly TokenService _tokenService;
+
+        public OtpController(OtpService otpService, EmailHelper emailHelper, DonorRepository donorRepository, TokenService tokenService)
+        {
+            _otpService = otpService;
+            _emailHelper = emailHelper;
+            _donorRepository = donorRepository;
+            _tokenService = tokenService;
+        }
+
+
+        [HttpPost("SendOTP")]
+        public async Task<IActionResult> SendOtp([FromBody] SendOtpRequest rq)
+        {
+            if (string.IsNullOrEmpty(rq.Email))
+                return BadRequest(new { success = false, message = "Email is required" });
+
+            var otp = await _otpService.GenerateAndSaveOtp(rq.Email);
+            var emailBody = $"<!DOCTYPE html>\r\n<html>\r\n<head>\r\n  <style>\r\n    body {{\r\n      font-family: Arial, sans-serif;\r\n      line-height: 1.6;\r\n      color: #333;\r\n      margin: 0;\r\n      padding: 0;\r\n    }}\r\n    .email-container {{\r\n      width: 100%;\r\n      max-width: 600px;\r\n      margin: 0 auto;\r\n      background: #f7f7f7;\r\n      padding: 20px;\r\n      border: 1px solid #ddd;\r\n      border-radius: 10px;\r\n    }}\r\n    .email-header {{\r\n      text-align: center;\r\n      padding: 10px 0;\r\n      background-color: #007BFF;\r\n      color: #fff;\r\n      font-size: 24px;\r\n      border-radius: 8px;\r\n    }}\r\n    .email-body {{\r\n      margin: 20px 0;\r\n      text-align: center;\r\n    }}\r\n    .otp {{\r\n      font-size: 36px;\r\n      font-weight: bold;\r\n      color: #007BFF;\r\n      margin: 10px 0;\r\n    }}\r\n    .email-footer {{\r\n      text-align: center;\r\n      font-size: 14px;\r\n      color: #999;\r\n    }}\r\n  </style>\r\n</head>\r\n<body>\r\n  <div class=\"email-container\">\r\n    <div class=\"email-header\">\r\n      Blood Bank Management System\r\n    </div>\r\n    <div class=\"email-body\">\r\n      <p>Dear User,</p>\r\n      <p>Here is your One-Time Password (OTP) to verify your email:</p>\r\n      <div class=\"otp\">{otp}</div>\r\n      <p>Please use this OTP to complete your verification process. The OTP is valid for the next 5 minutes.</p>\r\n    </div>\r\n    <div class=\"email-footer\">\r\n      © 2024 ● Blood Bank Management System. All Rights Reserved.\r\n    </div>\r\n  </div>\r\n</body>\r\n</html>";
+
+            await _emailHelper.SendEmail(rq.Email, "Red Vault OTP Code", emailBody);
+            return Ok(new { success = true, message = "OTP sent successfully!" });  
+        }
+
+        [HttpPost("VerifyOTP/Donor/Login")]
+        public async Task<IActionResult> VerifyOtpAndLogin([FromBody] OtpVerifyRequest request)
+        {
+            if (string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.OtpCode))
+                return BadRequest(new { success = false, message = "Email and OTP are required" });
+
+            // Retrieve donor details
+            var donor = _donorRepository.GetByEmail(request.Email);
+            if (donor == null)
+                return BadRequest(new { success = false, message = "Donor not found." });
+
+            var isValid = await _otpService.VerifyOtp(request.Email, request.OtpCode);
+            if (!isValid)
+                return BadRequest(new { success = false, message = "Invalid or expired OTP" });
+
+            // Generate JWT token
+            var token = _tokenService.GenerateToken(donor.DonorID, donor.Email);
+
+            return Ok(new
+            {
+                success = true,
+                message = "OTP verified successfully!",
+                token,
+                donorDetails = new
+                {
+                    donor.DonorID,
+                    donor.Name,
+                    donor.DOB,
+                    donor.Age,
+                    donor.Gender,
+                    donor.BloodGroupName,
+                    donor.Phone,
+                    donor.Email,
+                    donor.Address
+                }
+            });
+        }
+
+    }
+
+    public class SendOtpRequest
+    {
+        [Required(ErrorMessage="Email is required.")]
+        [EmailAddress]
+        public string Email { get; set; }
+    }
+
+    public class OtpVerifyRequest
+    {
+        [Required(ErrorMessage = "Email is required.")]
+        [EmailAddress]
+        public string Email { get; set; }
+
+        [Required(ErrorMessage = "OTP is required.")]
+        [MinLength(6, ErrorMessage = "OTP must be exactly 6 digits.")]
+        [MaxLength(6, ErrorMessage = "OTP must be exactly 6 digits.")]
+        public string OtpCode { get; set; }
+    }
+}
+
+
+TokenService.cs :
+
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+
+namespace BBMS_WebAPI.Services
+{
+    public class TokenService
+    {
+        private readonly string _key;
+        private readonly string _issuer;
+
+        public TokenService(IConfiguration configuration)
+        {
+            _key = configuration["Jwt:Key"];
+            _issuer = configuration["Jwt:Issuer"];
+        }
+
+        public string GenerateToken(int userId, string userEmail)
+        {
+            // Ensure the key length is sufficient
+            if (Encoding.UTF8.GetByteCount(_key) < 32)
+            {
+                throw new ArgumentException("JWT key must be at least 256 bits (32 bytes) long for HS256.");
+            }
+
+            var claims = new[]
+            {
+        new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
+        new Claim(JwtRegisteredClaimNames.Email, userEmail),
+        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+    };
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_key));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+                issuer: _issuer,
+                audience: _issuer,
+                claims: claims,
+                expires: DateTime.UtcNow.AddHours(1),
+                signingCredentials: creds);
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+
+    }
+}
+
+---------------- FRONTEND -----------------------
+
+useDonorApi.js :
+
+import { axiosInstance } from "../config/axiosInstance";
+
+const useDonorApi = () => {
+  
+  const recordDonorApi = async (formData) => {
+    try {
+      console.log("Payload being sent:", formData); // Debugging
+      const response = await axiosInstance.post("/Donor", formData);
+      return response.status === 200;
+    } catch (error) {
+      console.error("Error in recordDonorApi:", error.response?.data);
+      throw new Error(
+        error.response?.data?.message ||
+        "Failed to register donor. Please try again."
+      );
+    }
+  };
+
+  const checkDonorExistApi = async (email) => {
+    try {
+      // First check if donor already registered or not?
+      console.log("Checking login for email:", email); // Debugging email
+      const response = await axiosInstance.post("/Donor/Email", { email });
+      console.log("Login Response:", response.data); // Debugging response
+      return response.data.exists;
+    } catch (error) {
+      console.error("Error in verifyDonorApi:", error.response?.message);
+      throw new Error(
+        error.response?.message || "Failed to search donor. Please try again."
+      );
+    }
+  }
+
+
+  return {
+    recordDonorApi,
+    checkDonorExistApi
+  };
+};
+
+export default useDonorApi;
+
+useOtpApi.js :
+
+import { axiosInstance } from "../config/axiosInstance";
+
+// Implement API calls for sending OTP and validating OTP
+const useOtpApi = () => {
+  const sendOtpApi = async (email) => {
+    try {
+      const response = await axiosInstance.post("/Otp/SendOTP", 
+        { email }, 
+        { headers: { Authorization: "" } }
+      );
+      return response.data.success;
+    } catch (error) {
+      throw new Error(
+        error.response?.data?.message || "Network issue. Failed to send OTP. Please try again."
+      );
+    }
+  };
+
+  const verifyOtpApi = async (email, otp) => {
+    try {
+      const response = await axiosInstance.post("/Otp/VerifyOTP/Donor/Login", 
+        { Email: email, OtpCode: otp }, 
+        { headers: { Authorization: "" } 
+      });
+      return response.data;
+    } catch (error) {
+      throw new Error(
+        error.response?.data?.message || "Invalid or expired OTP. Please try again."
+      );
+    }
+  };
+
+  return { sendOtpApi, verifyOtpApi };
+};
+
+export default useOtpApi
+
+store.js (zustand) :
+
+import { create } from "zustand"
+
+export const useDonorStore = create((set) => ({
+  loggedDonor: null,
+  setLoggedDonor: (donor) => set({ loggedDonor: donor }),
+  initializeDonor: () => {
+    const token = localStorage.getItem("authToken");
+    if (token) {
+      // Optionally decode token or validate with backend
+      set({ loggedDonor: { isAuthenticated: true } });
+    }
+  },
+}));
+
+export const useRecipientStore = create((set) => ({
+  loggedRecipient: null,
+  setLoggedRecipient: (recipient) => set({ loggedRecipient: recipient })
+}))
+
+** axiosInstance.js :
+
+import axios from "axios";
+// import { VITE_BBMS_BACKEND_URL } from '../.env';
+
+// Create Axios instance with default configuration using baseURL from .env
+const axiosInstance = axios.create({
+    baseURL: import.meta.env.VITE_BBMS_BACKEND_URL,
+    headers: {
+      "Content-Type": "application/json",
+    },
+    withCredentials: true, // Required if the backend uses cookies or credentials
+});
+
+// Interceptor for logging requests and handling errors (optional)
+axiosInstance.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        console.error("Axios error:", error);
+        return Promise.reject(error);
+    }
+);
+
+axiosInstance.interceptors.request.use((config) => {
+    const token = localStorage.getItem("authToken");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+});
+
+export { axiosInstance };
+
+DonorLogin.jsx :
+
+import React, { useState } from "react";
+import toast, { Toaster } from "react-hot-toast";
+import Swal from "sweetalert2";
+import { CgSpinner } from "react-icons/cg";
+import { Link, useNavigate } from "react-router-dom";
+
+// Custom hook for form validation
+import { InputField } from "../../custom/CustomComponents";
+import OtpInput from "../../phone-otp/OtpInput";
+
+// Zustand state management
+import { useDonorStore } from "../../../zustand/store";
+import useDonorApi from "../../../hooks/useDonorApi";
+import useOtpApi from "../../../hooks/useOtpApi";
+
+const DonorLogin = () => {
+    const [email, setEmail] = useState("");
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [showOtpInput, setShowOtpInput] = useState(false);
+    const navigate = useNavigate();
+    // const [donor, setDonor] = useState(null);
+    const setLoggedDonor = useDonorStore((state) => state.setLoggedDonor);
+
+    // Custom hook to manage API calls
+    const { checkDonorExistApi } = useDonorApi();
+    const { sendOtpApi, verifyOtpApi } = useOtpApi();
+
+    // Handle Form Submission
+    const handleFormSubmit = async (e) => {
+        e.preventDefault();
+    
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          setError("Please enter a valid email address.");
+          return;
+        }
+    
+        try {
+          setLoading(true);
+          
+          // First, check if donor already exists
+          const isDonorExist = await checkDonorExistApi(email);
+
+          if (isDonorExist) {
+            const otpSent = await sendOtpApi(email); // Send OTP
+            if (otpSent) {
+              setShowOtpInput(true);
+              toast.success("OTP sent to your email successfully!");
+            }
+          } else {
+            // toast.error("Donor with given email does not exist.");
+            Swal.fire("Oops!", "Donor with given email does not exist.", "error");
+            return;
+          }
+        } catch (error) {
+          Swal.fire("Oops!", error.message, "error");
+          return
+        } finally {
+          setLoading(false);
+        }
+    };
+
+    // Handle OTP verification
+    const handleOtpSubmit = async (otp) => {
+      console.log("$$$$ handleOtpSubmit called")
+      
+        if (!email || !otp) {
+          toast.error("Please enter a valid OTP");
+          return;
+        }
+    
+        try {
+          setLoading(true);
+          const { token, donorDetails } = await verifyOtpApi(email, otp); // Verify OTP and get token
+
+          console.log("$$$ received token:", token)
+          console.log("$$$ received donorDetails:", donorDetails)
+
+          if (token) {
+            localStorage.setItem("authToken", token); // Save JWT in localStorage
+            toast.success("OTP verified successfully!");
+            Swal.fire("Red Vault", `Welcome back, ${donorDetails?.name}!`, "success");
+    
+            setLoggedDonor(donorDetails); // Save donor details in Zustand store
+            navigate("/DonorDashboard");
+          }
+        } catch (error) {
+          toast.error(error.message || "Error verifying OTP. Please try again.");
+          return
+        } finally {
+          setLoading(false);
+        }
+    };
+
+
+    return (
+        <div className="flex items-center justify-center min-h-screen">
+            <div className="w-full max-w-md bg-gray-100 p-10 rounded-xl shadow-lg">
+                <h4 className="text-3xl font-extrabold mb-10 text-center">
+                    <span className="underline decoration-4 decoration-red-500">
+                        Do
+                    </span>
+                    nor Login
+                </h4>
+
+                <Toaster toastOptions={{ duration: 4000 }} />
+
+                {!showOtpInput ? (
+                    <form onSubmit={handleFormSubmit}>
+                        <div className="mb-4">
+                            {/* Email */}
+                            <InputField
+                                label="Email"
+                                id="Email"
+                                type="email"
+                                placeholder="Enter your email"
+                                value={email}
+                                error={error}
+                                onChange={(e) => setEmail(e.target.value)}
+                            />
+                        </div>
+
+                        <div className="flex justify-center mt-4">
+                            <button
+                                type="submit"
+                                className="flex items-center font-bold text-white px-6 py-2 rounded shadow focus:outline-none bg-red-700 hover:bg-red-800"
+                                disabled={loading}
+                            >
+                                {loading ? (
+                                    <CgSpinner size={20} className="animate-spin" />
+                                ) : (
+                                    "Login"
+                                )}
+                            </button>
+                        </div>
+
+                        <p className="text-base text-center mt-4">
+                            Want to become a Donor?&nbsp;
+                            <Link
+                                to={"/DonorSignup"}
+                                className="underline font-bold hover:text-red-700 transition-all duration-300"
+                            >
+                                Register
+                            </Link>
+                        </p>
+                    </form>
+                ) : (
+                    <OtpInput
+                        length={6}
+                        onOtpSubmit={handleOtpSubmit}
+                        loading={loading}
+                    />
+                )}
+            </div>
+        </div>
+    );
+};
+
+export default DonorLogin;
