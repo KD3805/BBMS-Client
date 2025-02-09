@@ -2,7 +2,6 @@ import React, { useEffect, useState, Suspense, lazy } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom';
 import { IoMenu, IoClose } from "react-icons/io5";
 import '../../../DashboardStyle.css'
-import ExperimentTabs from './ExperimentTabs';
 
 // Lazy-load components
 const AdminProfile = lazy(() => import("./AdminProfile"))
@@ -10,7 +9,7 @@ const DonorsDetail = lazy(() => import("./DonorsDetail"))
 const RecipientsDetail = lazy(() => import("./RecipientsDetail"))
 const Donations = lazy(() => import("./Donations"))
 const BloodRequests = lazy(() => import("./BloodRequests"))
-const BloodGroupStock = lazy(() => import("./BloodGroupStock"));
+const BloodStock = lazy(() => import("./BloodStock"));
 
 const AdminDashboard = () => {
   const location = useLocation();
@@ -53,10 +52,6 @@ const AdminDashboard = () => {
       name: 'Blood Stock',
       nav: '/AdminDashboard/?layout=5'
     },
-    {
-      name: 'Experiment Tabs',
-      nav: '/AdminDashboard/?layout=6'
-    }
   ]
 
   const renderContent = () => {
@@ -72,9 +67,7 @@ const AdminDashboard = () => {
       case "4":
         return <BloodRequests />;
       case "5":
-        return <BloodGroupStock />;
-      case "6":
-        return <ExperimentTabs />;
+        return <BloodStock />;
       default:
         return <AdminProfile />;
     }

@@ -221,6 +221,7 @@ const Donations = () => {
               >
                 <thead style={{ backgroundColor: "#fce7f3", color: "#852B2D" }}>
                   <tr className="table-row">
+                    <th className="px-6 py-3 border border-gray-300 text-base font-bold uppercase tracking-tighter text-left">Sr.</th>
                     <th className="px-6 py-3 border border-gray-300 text-base font-bold uppercase tracking-tighter text-left">Donor Name</th>
                     <th className="px-6 py-3 border border-gray-300 text-base font-bold uppercase tracking-tighter text-left">Blood Group</th>
                     <th className="px-6 py-3 border border-gray-300 text-base font-bold uppercase tracking-tighter text-left">Quantity</th>
@@ -233,8 +234,9 @@ const Donations = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {donations.filter(donation => donation.status === "Pending").map((donation) => (
+                  {donations.filter(donation => donation.status === "Pending").map((donation, index) => (
                     <tr key={donation.donationID} className="text-base font-semibold text-black">
+                      <td className="px-6 py-4 whitespace-nowrap border border-gray-300">{index + 1}</td>
                       <td className="px-6 py-4 whitespace-nowrap border border-gray-300">{donation.donorName}</td>
                       <td className="px-6 py-4 whitespace-nowrap border border-gray-300">{donation.bloodGroupName}</td>
                       <td className="px-6 py-4 whitespace-nowrap border border-gray-300">{donation.quantity}</td>
@@ -286,6 +288,7 @@ const Donations = () => {
               >
                 <thead style={{ backgroundColor: "#fce7f3", color: "#852B2D" }}>
                   <tr className="table-row">
+                    <th className="px-6 py-3 border border-gray-300 text-base font-bold uppercase tracking-tighter text-left">Sr.</th>
                     <th className="px-6 py-3 border border-gray-300 text-base font-bold uppercase tracking-tighter text-left">Donor Name</th>
                     <th className="px-6 py-3 border border-gray-300 text-base font-bold uppercase tracking-tighter text-left">Blood Group</th>
                     <th className="px-6 py-3 border border-gray-300 text-base font-bold uppercase tracking-tighter text-left">Quantity</th>
@@ -298,8 +301,9 @@ const Donations = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {donations.map((donation) => (
+                  {donations.map((donation, index) => (
                     <tr key={donation.donationID} className="text-base font-semibold text-black">
+                      <td className="px-6 py-4 whitespace-nowrap border border-gray-300">{index + 1}</td>
                       <td className="px-6 py-4 whitespace-nowrap border border-gray-300">{donation.donorName}</td>
                       <td className="px-6 py-4 whitespace-nowrap border border-gray-300">{donation.bloodGroupName}</td>
                       <td className="px-6 py-4 whitespace-nowrap border border-gray-300">{donation.quantity}</td>

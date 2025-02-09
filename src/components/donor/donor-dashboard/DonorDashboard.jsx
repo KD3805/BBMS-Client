@@ -40,12 +40,8 @@ const DonorDashboard = () => {
       nav: '/DonorDashboard/?layout=2'
     },
     {
-      name: 'Donation Certificate',
-      nav: '/DonorDashboard/?layout=3'
-    },
-    {
       name: 'Manage Profile',
-      nav: '/DonorDashboard/?layout=4'
+      nav: '/DonorDashboard/?layout=3'
     }
   ]
 
@@ -58,8 +54,6 @@ const DonorDashboard = () => {
       case "2":
         return <DonorRepository />;
       case "3":
-        return <DonationCertificate />;
-      case "4":
         return <ManageDonorProfile />
       default:
         return <DonorProfile />;

@@ -20,8 +20,8 @@ const useOtpLoginApi = () => {
     try {
       const response = await axiosInstance.post("/Otp/VerifyOTP/Donor/Login", 
         { Email: email, OtpCode: otp }, 
-        { headers: { Authorization: "" } 
-      });
+        { headers: { Authorization: "" } }
+      );
       return response.data;
     } catch (error) {
       throw new Error(

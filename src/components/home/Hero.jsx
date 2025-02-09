@@ -23,8 +23,8 @@ const Hero = () => {
           </div>
         </div>
 
-        <div class="glow-effect">
-          <img src="hero1.png" alt="Red Vault" class="object-contain" />
+        <div className="glow-effect">
+          <img src="hero1.png" alt="Red Vault" className="object-contain" />
         </div>
       </div>
     </div>

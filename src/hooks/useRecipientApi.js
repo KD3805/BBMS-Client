@@ -16,6 +16,46 @@ const useRecipientApi = () => {
     }
   };
 
+  const fetchAllRecipientsApi = async () => {
+    try {
+      const response = await axiosInstance.get("/Recipient");
+      return response.data; 
+    } catch (error) {
+      console.error("Error in fetchAllRecipientsApi:", error.response?.data);
+      throw new Error(
+        error.response?.data ||
+        "Failed to fetch recipient records. Please try again."
+      );
+    }
+  };
+
+  const getRecipientByIdApi = async (recipientID) => {
+    try {
+      const response = await axiosInstance.get(`/Recipient/${recipientID}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error in getRecipientHistoryByRecipientID:", error);
+      throw new Error(
+        error.response?.data ||
+        "Failed to fetch recipient records. Please try again."
+      );
+    }
+  };
+
+  const updateRecipientApi = async (recipientID, formData) => {
+    try {
+      console.log("Payload being sent in Recipient Request (update):", formData); // Debugging
+      const response = await axiosInstance.put(`/Recipient/${recipientID}`, formData);
+      return response.status === 200;
+    } catch (error) {
+      console.error("Error in updateRecipientApi:", error.response?.data);
+      throw new Error(
+        error.response?.data ||
+        "Failed to update recipient request. Please try again."
+      );
+    }
+  };
+
   const checkRecipientExistApi = async (email) => {
     try {
       // First check if recipient already registered or not?
@@ -31,10 +71,27 @@ const useRecipientApi = () => {
     }
   }
 
+  const deleteRecipientApi = async (RecipientID) => {
+    try {
+      const response = await axiosInstance.delete(`/Recipient/${RecipientID}`);
+      return response.status === 200;
+    } catch (error) {
+      console.error("Error in deleteRecipientApi:", error.response?.data);
+      throw new Error(
+        error.response?.data ||
+        "Failed to delete recipient. Please try again."
+      );
+
+    }
+  };
 
   return {
     recordRecipientApi,
-    checkRecipientExistApi
+    checkRecipientExistApi,
+    fetchAllRecipientsApi,
+    getRecipientByIdApi,
+    updateRecipientApi,
+    deleteRecipientApi
   };
 };
 

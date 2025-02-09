@@ -8,8 +8,9 @@ export const useDonorStore = create((set) => ({
   setLoggedDonor: (donor, token) => set({ loggedDonor: donor, token }),
 
   logoutDonor: () => {
-    localStorage.removeItem("donorToken"); // Clear JWT from storage
-    set({ loggedDonor: null, token: null }); // Reset the store
+    localStorage.removeItem("donorToken");
+    set({ loggedDonor: null, token: null });
+    window.location.href = "/DonorLogin"; // Redirect to login page
   },
 
   initializeDonor: async () => {
@@ -22,11 +23,18 @@ export const useDonorStore = create((set) => ({
       });
       set({ loggedDonor: response.data, token });
     } catch (error) {
-      console.error("Auto-login failed:", error.message);
-      localStorage.removeItem("donorToken");
+      if (error.response?.status === 401) {
+        console.error("Auto-login failed: Unauthorized");
+        localStorage.removeItem("donorToken"); // Remove invalid token
+        
+      } else if (error.response?.status === 404) {
+        console.error("Auto-login failed: Profile not found");
+      } else {
+        console.error("Auto-login failed:", error.message);
+      }
     }
   },
-}))
+}));
 
 
 export const useRecipientStore = create((set) => ({
@@ -36,8 +44,9 @@ export const useRecipientStore = create((set) => ({
   setLoggedRecipient: (recipient, token) => set({ loggedRecipient: recipient, token }),
 
   logoutRecipient: () => {
-    localStorage.removeItem("recipientToken"); // Clear JWT from storage
-    set({ loggedRecipient: null, token: null }); // Reset the store
+    localStorage.removeItem("recipientToken");
+    set({ loggedRecipient: null, token: null });
+    window.location.href = "/RecipientLogin";
   },
 
   initializeRecipient: async () => {
@@ -54,8 +63,7 @@ export const useRecipientStore = create((set) => ({
       localStorage.removeItem("recipientToken");
     }
   },
-}))
-
+}));
 
 export const useAdminStore = create((set) => ({
   loggedAdmin: null,
@@ -64,8 +72,9 @@ export const useAdminStore = create((set) => ({
   setLoggedAdmin: (admin, token) => set({ loggedAdmin: admin, token }),
 
   logoutAdmin: () => {
-    localStorage.removeItem("adminToken"); // Clear JWT from storage
-    set({ loggedAdmin: null, token: null }); // Reset the store
+    localStorage.removeItem("adminToken");
+    set({ loggedAdmin: null, token: null });
+    window.location.href = "/AdminLogin";
   },
 
   initializeAdmin: async () => {

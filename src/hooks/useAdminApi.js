@@ -20,7 +20,7 @@ const useAdminApi = () => {
     try {
       // First check if admin already registered or not?
       console.log("Checking login for admin:", Email, Password); // Debugging email
-      const response = await axiosInstance.post("/Admin/Login", { Email, Password });
+      const response = await axiosInstance.post("/Admin/Login", { Email, Password }, { headers: { Authorization: "" }, });
       console.log("Admin Login Response:", response.data); // Debugging response
       return response.data.exists;
     } catch (error) {

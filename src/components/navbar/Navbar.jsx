@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 const Navbar = () => {
     const [active, setActive] = useState("ABOUT US");
     const [hovered, setHovered] = useState(null);
-    const navigate = useNavigate(); // Use the navigate hook from react-router-dom
+    const navigate = useNavigate();
 
     const links = [
         {
@@ -54,10 +54,6 @@ const Navbar = () => {
                     link: "/DonorSignup"
                 },
                 {
-                    name: "Donor Dashboard",
-                    link: "/DonorDashboard"
-                },
-                {
                     name: "Eligibility",
                     link: "/Eligibility"
                 },
@@ -71,13 +67,6 @@ const Navbar = () => {
             menu: {
                 name: "BLOOD BANK LOGIN",
                 link: "/AdminLogin",
-            },
-            submenu: [],
-        },
-        {
-            menu: {
-                name: "TEST",
-                link: "/test",
             },
             submenu: [],
         },
@@ -96,9 +85,10 @@ const Navbar = () => {
                             } unline-navigation`}
                         onMouseEnter={() => setHovered(link.menu.name)}
                         onMouseLeave={() => setHovered(null)}
-                        onClick={() => { 
-                            setActive(link.menu.name)
-                            navigate(link.menu.link)
+                        onClick={(e) => { 
+                            e.stopPropagation(); // Prevent event bubbling
+                            setActive(link.menu.name);
+                            navigate(link.menu.link);
                         }}
                     >
                         <span>{link.menu.name}</span>
@@ -106,9 +96,11 @@ const Navbar = () => {
                             <div className="submenu">
                                 <ul>
                                     {link.submenu.map((sublink, index) => (
-                                        <li key={index} className="submenu-item" onClick={() => {
-                                            setHovered(null); // Unhover the submenu when a link is clicked
-                                            navigate(sublink.link); // Navigate to the linked page
+                                        <li key={index} className="submenu-item" onClick={(e) => {
+                                            e.stopPropagation(); // Prevent event bubbling
+                                            setHovered(null); 
+                                            setActive(link.menu.name);
+                                            navigate(sublink.link); 
                                         }}>
                                             {sublink.name}
                                         </li>

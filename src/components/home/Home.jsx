@@ -8,8 +8,6 @@ import Footer from './Footer'
 
 
 const Home = () => {
-  const loggedDonor = useDonorStore(state => state.loggedDonor)
-  console.log("### loggedDonor", loggedDonor)
 
   return (
     <div className='min-h-screen bg-gray-50 w-full'>

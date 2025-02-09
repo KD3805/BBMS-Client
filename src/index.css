@@ -29,6 +29,10 @@
   background-image: linear-gradient(230deg, #51d77b, #09db48, #44d73d, #2fff00); 
 }
 
+.gradient-download {
+  background-image: linear-gradient(230deg, #2998ff, #096bdb, #0033ab, #3300ff); 
+}
+
 .gradient-pending {
   background-image: linear-gradient(230deg, #bdbdbd, #cacaca, #dedede, #ebebeb); 
 }

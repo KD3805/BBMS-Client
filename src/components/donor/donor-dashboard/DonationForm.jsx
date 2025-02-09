@@ -8,7 +8,7 @@ import { InputField, SelectField, TextAreaField } from "../../custom/CustomCompo
 // Zustand state management
 import { useDonorStore } from "../../../zustand/store";
 // Custom hook for API calls
-import useFormValidation from "../../../hooks/useFormValidation"; 
+import useFormValidation from "../../../hooks/useFormValidation";
 import useDonationApi from "../../../hooks/useDonationApi";
 
 const DonationForm = () => {
@@ -27,9 +27,9 @@ const DonationForm = () => {
   } = useFormValidation({
     DonorName: donor?.name || donor?.Name,
     BloodGroupName: donor?.bloodGroupName || donor?.BloodGroupName,
-    Quantity: donationData ? donationData.quantity : 0,
-    Weight: donationData ? donationData.weight : 0,
-    Disease: donationData ? donationData.disease : "",
+    Quantity: donationData?.quantity || "",
+    Weight: donationData?.weight || "",
+    Disease: donationData?.disease || "",
   });
 
   // Custom hook to manage API calls
@@ -42,8 +42,8 @@ const DonationForm = () => {
     try {
       setLoading(true);
       if (donationData) {
-        // Update existing donation
-        await updateDonationApi({ ...formData, DonationID: donationData.donationID });
+        // Ensure DonationID is passed correctly in both the URL and request body
+        await updateDonationApi(donationData.donationID, { ...formData, DonationID: donationData.donationID });
         Swal.fire("Success!", "Donation request updated successfully!", "success");
       } else {
         // Record new donation
@@ -53,7 +53,7 @@ const DonationForm = () => {
     } catch (error) {
       Swal.fire("Oops!", error.message || "Error processing donation. Please try again.", "error");
     } finally {
-      navigate("/DonorDashboard");
+      navigate("/DonorDashboard/?layout=2");
       setLoading(false);
     }
   };
@@ -106,18 +106,25 @@ const DonationForm = () => {
               error={errors.Weight}
               onChange={handleInputChange}
             />
-            </div>
+          </div>
 
-            {/* Disease */}
-            <TextAreaField
-              label="Disease (if any)"
-              id="Disease"
-              placeholder="Enter your Disease (if any)"
-              value={formData.Disease}
-              error={errors.Disease}
-              onChange={handleInputChange}
-              mandatory={false}
-            />
+          {/* Disease */}
+          <TextAreaField
+            label="Disease (if any)"
+            id="Disease"
+            placeholder="Enter your Disease (if any)"
+            value={formData.Disease}
+            error={errors.Disease}
+            onChange={(e) => {
+              const value = e.target.value.trim();
+              if (value.length > 200) {
+                toast.error("Disease description is too long (max 200 characters).");
+              } else {
+                handleInputChange(e);
+              }
+            }}
+            mandatory={false}
+          />
 
 
           {/* Submit Button */}
@@ -141,7 +148,7 @@ const DonationForm = () => {
           </div>
 
         </form>
-        
+
       </div>
     </div>
   );

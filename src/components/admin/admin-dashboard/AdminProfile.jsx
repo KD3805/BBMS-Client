@@ -12,7 +12,7 @@ const AdminProfile = () => {
       <div className="w-full flex justify-evenly items-center flex-wrap flex-grow">
 
         {/* First Card */}
-        <div className="w-[350px] h-fit red-bg-gradient text-white flex flex-col items-start rounded-tl-3xl rounded-br-3xl">
+        {/* <div className="w-[350px] h-fit red-bg-gradient text-white flex flex-col items-start rounded-tl-3xl rounded-br-3xl">
           <div className="w-full px-2">
             <div className="border-b py-4">
               <div className="flex flex-col justify-between items-end">
@@ -48,7 +48,7 @@ const AdminProfile = () => {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Second Card */}
         <div className="w-[350px] h-fit red-bg-gradient text-white flex flex-col items-start rounded-tl-3xl rounded-br-3xl">
@@ -87,7 +87,50 @@ const AdminProfile = () => {
             </div>
           </div>
         </div>
+
+
+        {/* Second Card */}
+        <div className="w-[350px] h-fit red-bg-gradient text-white flex flex-col items-start rounded-tl-3xl rounded-br-3xl">
+          <div className="w-full px-2">
+            <div className="border-b py-4">
+              <div className="flex flex-col justify-between items-end">
+                <div className="flex gap-2 items-center justify-center ">
+                  <p className="text-5xl">0</p>
+                  <span className="text-4xl">
+                  <BiSolidDonateBlood />
+                  </span>
+                </div>
+                <div className="text-end">
+                  <p className="text-xl font-semibold me-2">Total Donations</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="w-full px-4 py-6">
+            <div className="flex justify-between items-center">
+              <div className="flex flex-col items-start">
+                <p className="text-base">Pending</p>
+                <p className="text-lg font-bold">0</p>
+              </div>
+
+              <div className="flex flex-col items-start">
+                <p className="text-base">Accepted</p>
+                <p className="text-lg font-bold">0</p>
+              </div>
+
+              <div className="flex flex-col items-start">
+                <p className="text-base">Rejected</p>
+                <p className="text-lg font-bold">0</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        
       </div>
+
+      
 
       {/* Admin Information Table */}
       <div
