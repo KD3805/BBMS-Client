@@ -1,7 +1,7 @@
 import { axiosInstance } from "../config/axiosInstance";
 
 const useAdminApi = () => {
-  
+
   const recordAdminApi = async (formData) => {
     try {
       console.log("Payload being sent:", formData); // Debugging
@@ -31,10 +31,24 @@ const useAdminApi = () => {
     }
   }
 
+  // Dashboard report fetches all statistics related to the admin dashboard
+  const getAdminDashboardReportCounts = async () => {
+    try {
+      const response = await axiosInstance.get("/Admin/DashboardReport");
+      return response.data;
+    } catch (error) {
+      console.error("Error in getAdminDashboardReportCounts:", error.response?.data);
+      throw new Error(
+        error.response?.data?.message ||
+        "Failed to fetch report counts. Please try again."
+      );
+    }
+  }
 
   return {
     recordAdminApi,
-    checkAdminExistApi
+    checkAdminExistApi,
+    getAdminDashboardReportCounts
   };
 };
 

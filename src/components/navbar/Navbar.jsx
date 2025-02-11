@@ -34,8 +34,8 @@ const Navbar = () => {
                     link: "/BloodAvailability",
                 },
                 {
-                    name: "Thalassemia Request",
-                    link: "/ThalassemiaRequest",
+                    name: "Thalassemia Detection",
+                    link: "/Thalassemia/Detection",
                 },
             ],
         },
