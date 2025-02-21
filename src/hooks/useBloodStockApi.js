@@ -1,7 +1,7 @@
 import { axiosInstance } from "../config/axiosInstance";
 
 const useBloodStockApi = () => {
-  
+
   const recordBloodStockApi = async (formData) => {
     try {
       console.log("Payload being sent:", formData);
@@ -15,11 +15,11 @@ const useBloodStockApi = () => {
       );
     }
   };
-  
+
   const fetchAllBloodStocksApi = async () => {
     try {
       const response = await axiosInstance.get("/BloodStock");
-      return response.data; 
+      return response.data;
     } catch (error) {
       console.error("Error in fetchAllBloodStocksApi:", error.response?.data);
       throw new Error(
@@ -70,12 +70,26 @@ const useBloodStockApi = () => {
     }
   };
 
+  const fetchBloodAvailabilityByGroupApi = async (bloodGroupName) => {
+    try {
+      const response = await axiosInstance.get(`/BloodStock/BloodAvailability/${bloodGroupName}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error in fetchBloodAvailabilityByGroupApi:", error.response?.data);
+      throw new Error(
+        error.response?.data?.message ||
+        "Failed to fetch blood availability data. Please try again."
+      );
+    }
+  };
+
   return {
     recordBloodStockApi,
     fetchAllBloodStocksApi,
     getBloodStockByIdApi,
     updateBloodStockApi,
     deleteBloodStockApi,
+    fetchBloodAvailabilityByGroupApi,
   };
 };
 

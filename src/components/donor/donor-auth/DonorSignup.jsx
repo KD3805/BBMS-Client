@@ -4,7 +4,7 @@ import Swal from "sweetalert2";
 import { CgSpinner } from "react-icons/cg";
 import { Link, useNavigate } from "react-router-dom";
 // Custom hook for form validation
-import { InputField, SelectField, TextAreaField } from "../../custom/CustomComponents";
+import { InputField, OutlinedButton, SelectField, TextAreaField } from "../../custom/CustomComponents";
 import OtpInput from "../../phone-otp/OtpInput";
 // Zustand state management
 import { useDonorStore } from "../../../zustand/store";
@@ -67,7 +67,8 @@ const DonorSignup = () => {
           toast.success("OTP sent to your email successfully!");
         }
       } catch (error) {
-        toast.error(error.message || "Error sending OTP. Please try again.");
+        // toast.error(error.message || "Error sending OTP. Please try again.");
+        Swal.fire("Oops!", error.message || "Error sending OTP. Please try again.", "error");
       } finally {
         setLoading(false);
       }
@@ -99,10 +100,17 @@ const DonorSignup = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="w-full max-w-5xl bg-gray-100 p-10 rounded-xl shadow-lg">
-        <h4 className="text-3xl font-extrabold mb-10">
-          <span className="underline decoration-4 decoration-red-500">Do</span>nor Sign Up
+    <div className="flex items-center justify-center min-h-screen relative">
+      <div className="absolute inset-0 z-0">
+        <img
+          src="https://images.unsplash.com/photo-1615461066841-6116e61058f4?auto=format&fit=crop&w=2000&q=80"
+          alt="Blood Donation"
+          className="w-full h-full object-cover opacity-10"
+        />
+      </div>
+      <div className="absolute z-10 w-full max-w-5xl red-bg-gradient text-white p-10 rounded-xl shadow-lg border-2 border-red-800">
+        <h4 className="text-3xl font-extrabold mb-10 text-center">
+          Donor Sign up
         </h4>
 
         <Toaster toastOptions={{ duration: 4000 }} />
@@ -197,13 +205,13 @@ const DonorSignup = () => {
 
             {/* Submit Button */}
             <div className="flex justify-center mt-4">
-              <button
+              <OutlinedButton 
                 type="submit"
-                className="bg-red-700 text-white px-6 py-2 rounded hover:bg-red-800"
                 disabled={loading}
-              >
-                {loading ? <CgSpinner size={20} className="animate-spin" /> : "Submit"}
-              </button>
+                loading={loading}
+                text="Submit"
+                w="w-1/3"
+              />
             </div>
 
             <p className="text-base text-center mt-4">

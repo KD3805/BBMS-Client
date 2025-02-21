@@ -4,7 +4,7 @@ import Swal from "sweetalert2";
 import { CgSpinner } from "react-icons/cg";
 import { useNavigate, useLocation } from "react-router-dom";
 // Custom hook for form validation
-import { InputField, SelectField, TextAreaField } from "../../custom/CustomComponents";
+import { InputField, OutlinedButton, SelectField, TextAreaField } from "../../custom/CustomComponents";
 // Zustand state management
 import { useDonorStore } from "../../../zustand/store";
 // Custom hook for API calls
@@ -59,10 +59,10 @@ const DonationForm = () => {
   };
 
   return (
-    <div className="flex items-start justify-center min-h-screen mt-10">
-      <div className="w-full max-w-5xl bg-gray-100 p-10 rounded-xl shadow-lg">
-        <h4 className="text-3xl font-extrabold mb-10">
-          <span className="underline decoration-4 decoration-red-500">Do</span>nation Form
+    <div className="flex items-start justify-center min-h-screen mt-10 relative">
+      <div className="absolute z-10 w-full max-w-5xl red-bg-gradient text-white p-10 rounded-xl shadow-lg border-2 border-red-800">
+        <h4 className="text-3xl font-extrabold mb-10 text-center">
+          Donation Form
         </h4>
 
         <Toaster toastOptions={{ duration: 4000 }} />
@@ -128,18 +128,17 @@ const DonationForm = () => {
 
 
           {/* Submit Button */}
-          <div className="flex justify-center items-center gap-8 mt-4">
-            <button
+          <div className="flex justify-center items-center gap-8 mt-4 flex-wrap">
+            <OutlinedButton
               type="submit"
-              className="bg-red-700 text-white px-6 py-2 rounded hover:bg-red-800"
               disabled={loading}
-            >
-              {loading ? <CgSpinner size={20} className="animate-spin" /> : "Submit"}
-            </button>
-
+              loading={loading}
+              text="Submit"
+              w="w-36"
+            />
             <button
               type="reset"
-              className="bg-white text-black px-6 py-2 border border-black rounded hover:bg-gray-200 transition-all duration-300"
+              className="w-36 bg-gray-300 text-black px-6 py-2 border border-black rounded hover:bg-gray-200 transition-all duration-300"
               disabled={loading}
               onClick={() => navigate("/DonorDashboard")}
             >

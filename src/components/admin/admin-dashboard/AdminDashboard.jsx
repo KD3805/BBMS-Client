@@ -2,6 +2,8 @@ import React, { useEffect, useState, Suspense, lazy } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom';
 import { IoMenu, IoClose } from "react-icons/io5";
 import '../../../DashboardStyle.css'
+import { useAdminStore } from '../../../zustand/store';
+import { OutlinedButton } from '../../custom/CustomComponents';
 
 // Lazy-load components
 const AdminProfile = lazy(() => import("./AdminProfile"))
@@ -18,6 +20,7 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(null);
   const [checked, setChecked] = useState(false);
+  const logoutAdmin = useAdminStore(state => state.logoutAdmin);
 
   const handleTabClick = (index) => {
     setActiveTab(index);
@@ -25,7 +28,7 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     setActiveTab(layout)
-  }, [layout]); 
+  }, [layout]);
 
   const menuBar = [
     {
@@ -45,9 +48,9 @@ const AdminDashboard = () => {
       nav: '/AdminDashboard/?layout=3'
     },
     {
-        name: 'Blood Requests',
-        nav: '/AdminDashboard/?layout=4'
-      },
+      name: 'Blood Requests',
+      nav: '/AdminDashboard/?layout=4'
+    },
     {
       name: 'Blood Stock',
       nav: '/AdminDashboard/?layout=5'
@@ -80,10 +83,18 @@ const AdminDashboard = () => {
 
           <div className='flex items-center justify-between w-full border-b'>
             <div className='open-sidebar-btn mb-2 text-2xl' onClick={() => setChecked(true)}>
-              <IoMenu />  
+              <IoMenu />
             </div>
 
             <h1 className='lg:text-3xl md:text-2xl text-2xl mb-3 font-semibold text-end '>{menuBar?.[activeTab]?.name}</h1>
+
+            <div className='w-fit'>
+            <OutlinedButton
+                type="button"
+                onClick={() => logoutAdmin()}
+                text='Log out'
+              />
+            </div>
           </div>
 
           <div className='flex'>

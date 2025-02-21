@@ -1,53 +1,44 @@
 import axios from "axios";
-import { useDonorStore } from "../zustand/store";
+import { useDonorStore, useRecipientStore, useAdminStore } from "../zustand/store";
 
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_BBMS_BACKEND_URL,
+  baseURL: import.meta.env.VITE_BBMS_BACKEND_URL, // e.g., "/api" in development
   headers: {
     "Content-Type": "application/json",
   },
   withCredentials: true,
 });
 
+// Consolidated response interceptor for 401 errors.
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      const logoutDonor = useDonorStore.getState().logoutDonor;
-      logoutDonor(); // Clear token and donor data
-      window.location.href = "/DonorLogin"; // Redirect to login page
-    }
+      // Determine which store's token is present
+      const donorToken = localStorage.getItem("donorToken");
+      const recipientToken = localStorage.getItem("recipientToken");
+      const adminToken = localStorage.getItem("adminToken");
 
+      if (donorToken) {
+        const logoutDonor = useDonorStore.getState().logoutDonor;
+        logoutDonor(); // Clear donor token and data
+        window.location.href = "/DonorLogin";
+      } else if (recipientToken) {
+        const logoutRecipient = useRecipientStore.getState().logoutRecipient;
+        logoutRecipient(); // Clear recipient token and data
+        window.location.href = "/RecipientLogin";
+      } else if (adminToken) {
+        const logoutAdmin = useAdminStore.getState().logoutAdmin;
+        logoutAdmin(); // Clear admin token and data
+        window.location.href = "/AdminLogin";
+      }
+    }
     return Promise.reject(error);
   }
 );
 
-axiosInstance.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      const logoutRecipient = useRecipientStore.getState().logoutRecipient;
-      logoutRecipient(); // Clear token and donor data
-      window.location.href = "/RecipientLogin"; // Redirect to login page
-    }
-
-    return Promise.reject(error);
-  }
-);
-
-axiosInstance.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      const logoutAdmin = useAdminStore.getState().logoutAdmin;
-      logoutAdmin(); // Clear token and donor data
-      window.location.href = "/AdminLogin"; // Redirect to login page
-    }
-
-    return Promise.reject(error);
-  }
-);
-
+// Request interceptor to set the Authorization header based on available token.
+// In case multiple tokens exist, you might want to decide on a priority.
 axiosInstance.interceptors.request.use((config) => {
   const donorToken = localStorage.getItem("donorToken");
   const recipientToken = localStorage.getItem("recipientToken");
@@ -55,11 +46,9 @@ axiosInstance.interceptors.request.use((config) => {
 
   if (donorToken) {
     config.headers.Authorization = `Bearer ${donorToken}`;
-  }
-  if(recipientToken) {
+  } else if (recipientToken) {
     config.headers.Authorization = `Bearer ${recipientToken}`;
-  }
-  if(adminToken) {
+  } else if (adminToken) {
     config.headers.Authorization = `Bearer ${adminToken}`;
   }
 

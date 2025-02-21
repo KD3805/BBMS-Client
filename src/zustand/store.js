@@ -10,7 +10,7 @@ export const useDonorStore = create((set) => ({
   logoutDonor: () => {
     localStorage.removeItem("donorToken");
     set({ loggedDonor: null, token: null });
-    window.location.href = "/DonorLogin"; // Redirect to login page
+    // window.location.href = "/DonorLogin";
   },
 
   initializeDonor: async () => {
@@ -46,7 +46,7 @@ export const useRecipientStore = create((set) => ({
   logoutRecipient: () => {
     localStorage.removeItem("recipientToken");
     set({ loggedRecipient: null, token: null });
-    window.location.href = "/RecipientLogin";
+    // window.location.href = "/RecipientLogin";
   },
 
   initializeRecipient: async () => {
@@ -74,7 +74,7 @@ export const useAdminStore = create((set) => ({
   logoutAdmin: () => {
     localStorage.removeItem("adminToken");
     set({ loggedAdmin: null, token: null });
-    window.location.href = "/AdminLogin";
+    // window.location.href = "/AdminLogin";
   },
 
   initializeAdmin: async () => {

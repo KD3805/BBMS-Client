@@ -2,6 +2,8 @@ import React, { useEffect, useState, Suspense, lazy } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom';
 import { IoMenu, IoClose } from "react-icons/io5";
 import '../../../DashboardStyle.css'
+import { OutlinedButton } from '../../custom/CustomComponents';
+import { useRecipientStore } from '../../../zustand/store';
 
 // Lazy-load components
 const RecipientProfile = lazy(() => import("./RecipientProfile"))
@@ -16,6 +18,8 @@ const RecipientDashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(null);
   const [checked, setChecked] = useState(false);
+  const logoutRecipient = useRecipientStore(state => state.logoutRecipient);
+
 
   const handleTabClick = (index) => {
     setActiveTab(index);
@@ -70,6 +74,14 @@ const RecipientDashboard = () => {
             </div>
 
             <h1 className='lg:text-3xl md:text-2xl text-2xl mb-3 font-semibold text-end '>{menuBar?.[activeTab]?.name}</h1>
+
+            <div className='w-fit'>
+              <OutlinedButton
+                type="button"
+                onClick={() => logoutRecipient()}
+                text='Log out'
+              />
+            </div>
           </div>
 
           <div className='flex'>

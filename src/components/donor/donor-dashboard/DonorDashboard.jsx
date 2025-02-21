@@ -2,6 +2,8 @@ import React, { useEffect, useState, Suspense, lazy } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom';
 import { IoMenu, IoClose } from "react-icons/io5";
 import '../../../DashboardStyle.css'
+import { OutlinedButton } from '../../custom/CustomComponents';
+import { useDonorStore } from '../../../zustand/store';
 
 // Lazy-load components
 const DonorProfile = lazy(() => import("./DonorProfile"))
@@ -17,6 +19,7 @@ const DonorDashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(null);
   const [checked, setChecked] = useState(false);
+  const logoutDonor = useDonorStore(state => state.logoutDonor);
 
   const handleTabClick = (index) => {
     setActiveTab(index);
@@ -71,6 +74,14 @@ const DonorDashboard = () => {
             </div>
 
             <h1 className='lg:text-3xl md:text-2xl text-2xl mb-3 font-semibold text-end '>{menuBar?.[activeTab]?.name}</h1>
+
+            <div className='w-fit'>
+              <OutlinedButton
+                type="button"
+                onClick={() => logoutDonor()}
+                text='Log out'
+              />
+            </div>
           </div>
 
           <div className='flex'>

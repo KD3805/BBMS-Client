@@ -10,6 +10,7 @@ import OtpInput from "../../phone-otp/OtpInput";
 import { useAdminStore } from "../../../zustand/store";
 import useAdminApi from "../../../hooks/useAdminApi";
 import useOtpLoginApi from "../../../hooks/useOtpLoginApi";
+import { InputField, OutlinedButton } from "../../custom/CustomComponents";
 
 const AdminLogin = () => {
   const [email, setEmail] = useState("");
@@ -99,45 +100,38 @@ const AdminLogin = () => {
         {!showOtpInput ? (
           <form onSubmit={handleFormSubmit}>
             <div className="mb-4">
+              {/* Email */}
               <div className="mb-4">
-                <label htmlFor="Email" className="block font-bold text-lg">
-                  Email <span className="text-red-300">*</span>
-                </label>
-                <input
-                  type="email"
+                <InputField
+                  label="Email"
                   id="Email"
-                  className={`w-full p-2 border rounded text-black focus:outline-none focus:ring focus:ring-blue-300`}
+                  type="email"
                   placeholder="Enter your email"
                   value={email}
+                  error={error}
                   onChange={(e) => setEmail(e.target.value)}
                 />
-                {error && <small className="text-sm text-zinc-200">{error}</small>}
               </div>
 
-              <div>
-                <label htmlFor="Password" className="block font-bold text-lg">
-                  Password <span className="text-red-300">*</span>
-                </label>
-                <input
-                  type="password"
-                  id="Password"
-                  className={`w-full p-2 border rounded text-black focus:outline-none focus:ring focus:ring-blue-300`}
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-                {error && <small className="text-sm text-zinc-200">{error}</small>}
-              </div>
+              <InputField
+                label="Password"
+                id="Password"
+                type="password"
+                placeholder="Enter your password"
+                value={password}
+                error={error}
+                onChange={(e) => setPassword(e.target.value)}
+              />
             </div>
 
             <div className="flex justify-center mt-6">
-              <button
+              <OutlinedButton
                 type="submit"
-                className="flex items-center font-bold justify-center w-1/3 h-10 px-6 py-2 rounded shadow focus:outline-none bg-white border-2 border-red-700 text-red-700 hover:bg-red-400 hover:text-white hover:border-none transition-all duration-300"
                 disabled={loading}
-              >
-                {loading ? <CgSpinner size={20} className="animate-spin" /> : "Login"}
-              </button>
+                loading={loading}
+                text="Login"
+                w="w-1/3"
+              />
             </div>
 
             {/* <p className="text-base text-center mt-6">

@@ -20,6 +20,7 @@ import { useDonorStore, useRecipientStore, useAdminStore } from "./zustand/store
 import AboutBloodDonation from "./components/about/AboutBloodDonation.jsx";
 import Eligibility from "./components/about/Eligibility.jsx";
 import ThalassemiaDetection from "./components/thalassemia/ThalassemiaDetection.jsx";
+import BloodAvailability from "./components/blood-stock/BloodAvailability.jsx";
 
 const MainApp = () => {
   const initializeDonor = useDonorStore((state) => state.initializeDonor);
@@ -44,9 +45,10 @@ const MainApp = () => {
           <Route path="/AboutBloodDonation" element={<AboutBloodDonation />} />
           <Route path="/Eligibility" element={<Eligibility />} />
           <Route path="/Thalassemia/Detection" element={<ThalassemiaDetection />} />
-
-          {/* Donor Protected Routes */}
-          <Route
+          <Route path="/BloodAvailability" element={<BloodAvailability />} />
+        </Route>
+        {/* Donor Protected Routes */}
+        <Route
             path="/DonorDashboard"
             element={
               <DonorProtectedRoute
@@ -83,7 +85,6 @@ const MainApp = () => {
               </AdminProtectedRoute>
             }
           />
-        </Route>
       </Routes>
     </BrowserRouter>
   );

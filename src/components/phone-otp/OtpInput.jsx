@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { CgSpinner } from "react-icons/cg";
+import { OutlinedButton } from "../custom/CustomComponents";
 
 const OtpInput = ({
     length = 4,
@@ -125,8 +126,8 @@ const OtpInput = ({
                         onKeyDown={(e) => handleBackspace(index, e)}
                         disabled={isExpired} // Disable inputs if OTP is expired
                         className={`w-12 h-12 m-3 text-center text-xl font-bold border border-gray-300 rounded focus:outline-none ${isExpired
-                                ? "bg-gray-300 cursor-not-allowed"
-                                : "focus:ring focus:ring-blue-300"
+                            ? "bg-gray-300 cursor-not-allowed"
+                            : "focus:ring focus:ring-blue-300"
                             }`}
                     />
                 ))}
@@ -142,6 +143,23 @@ const OtpInput = ({
 
                 {/* Verify OTP Button */}
                 {/* Resend OTP Button */}
+                {/* {isExpired ? (
+                    <OutlinedButton
+                        type="button"
+                        onClick={handleResendOtp}
+                        disabled={loading}
+                        loading={loading}
+                        text="Resend OTP"
+                    />
+                ) : (
+                    <OutlinedButton
+                        type="button"
+                        onClick={handleVerifyOtp}
+                        disabled={loading || isExpired}
+                        loading={loading}
+                        text="Verify OTP"
+                    />
+                )} */}
                 {isExpired ? (
                     <button
                         type="button"

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { GiDrop } from "react-icons/gi";
 import { BiSolidDonateBlood } from "react-icons/bi";
 import { useAdminStore } from "../../../zustand/store";
 import useAdminApi from "../../../hooks/useAdminApi";
@@ -57,7 +58,7 @@ const AdminProfile = () => {
               <div className="flex flex-col justify-between items-end">
                 <div className="flex gap-2 items-center justify-center">
                   <p className="text-5xl">{reportCounts.totalDonors}</p>
-                  <span className="text-4xl"><BiSolidDonateBlood /></span>
+                  <span className="text-4xl"><GiDrop /></span>
                 </div>
                 <div className="text-end">
                   <p className="text-xl font-semibold me-2">Total Donors</p>

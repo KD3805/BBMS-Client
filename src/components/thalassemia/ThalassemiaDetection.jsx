@@ -1,242 +1,252 @@
-// File: ThalassemiaDetection.js
 import React, { useState } from "react";
+import axios from "axios";
+import { CgSpinner } from "react-icons/cg";
+import useFormValidation from "../../hooks/useFormValidation";
+import { FilledButton, InputField, OutlinedButton } from "../custom/CustomComponents";
+import toast, { Toaster } from "react-hot-toast";
+import Swal from "sweetalert2";
 
-function ThalassemiaDetection() {
+const ThalassemiaDetection = () => {
   const [file, setFile] = useState(null);
   const [extractedParams, setExtractedParams] = useState(null);
-  const [formParams, setFormParams] = useState({});
-  const [predictionResult, setPredictionResult] = useState(null);
+  // const [formData, setFormData] = useState({});
+  const [prediction, setPrediction] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [selectedFileName, setSelectedFileName] = useState(null); // State to store the selected file name
 
+  const { formData, setFormData, errors, handleInputChange, validateForm } =
+    useFormValidation({});
+
+  // Handle file selection
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
-    // Reset state if a new file is chosen.
     setExtractedParams(null);
-    setFormParams({});
-    setPredictionResult(null);
+    setFormData({});
+    setPrediction(null);
+    setError(null);
+    setSelectedFileName(e.target.files[0].name); // Update the selected file name
   };
 
-  // Step 1: Upload file and retrieve extracted parameters.
-  const handleUpload = async () => {
-    if (!file) return;
+  // Function to remove the selected file
+  const handleRemoveFile = () => {
+    setFile(null);
+    setSelectedFileName(null); // Clear the selected file name
+  };
+
+  // Upload file and extract parameters from backend (/upload-report/)
+  const handleFileUpload = async () => {
+    if (!file) {
+      setError("Please select a file to upload.");
+      return;
+    }
+    setLoading(true);
+    setError(null);
     const formData = new FormData();
     formData.append("file", file);
     try {
-      const res = await fetch("http://localhost:8000/upload-report/", {
-        method: "POST",
-        body: formData,
-      });
-      const data = await res.json();
-      setExtractedParams(data.extracted_parameters);
-      setFormParams(data.extracted_parameters); // Pre-populate the form.
-    } catch (error) {
-      console.error("Error uploading file:", error);
+      const response = await axios.post(
+        "http://127.0.0.1:8000/upload-report/",
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
+      // Expect the backend to return { extracted_parameters: { ... } }
+      setExtractedParams(response.data.extracted_parameters);
+      setFormData(response.data.extracted_parameters); // Pre-populate the form
+    } catch (err) {
+      console.error(err);
+      setError("Error uploading the file or extracting parameters.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Step 2: Allow the user to modify/review the extracted parameters.
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormParams((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+  // Handle form input changes for review/editing of extracted parameters
+  // const handleInputChange = (e) => {
+  //   const { name, value } = e.target;
+  //   setFormData((prev) => ({
+  //     ...prev,
+  //     [name]: value
+  //   }));
+  // };
 
-  // Step 3: Submit the reviewed parameters for prediction.
+  // Submit the reviewed parameters for prediction (/predict-report/)
   const handlePredict = async () => {
+    setLoading(true);
+    setError(null);
     try {
-      const res = await fetch("http://localhost:8000/predict-report/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formParams),
-      });
-      const data = await res.json();
-      setPredictionResult(data);
-    } catch (error) {
-      console.error("Error predicting report:", error);
+      const response = await axios.post(
+        "http://127.0.0.1:8000/predict-report/",
+        formData,
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+      // Expect response data like { prediction: 0 or 1, report_id: ..., parameters: { ... } }
+      setPrediction(response.data.prediction);
+      if (response.data.prediction !== null) {
+        if (response.data.prediction === 0) {
+          Swal.fire("Good job!", "Likely to be a normal individual", "success");
+        } else {
+          Swal.fire({ icon: "info", title: "Opps!", text: "Likely to be an alpha thalassemia carrier" });
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Error during prediction. Please check your input and try again.")
+      // setError(
+      //   "Error during prediction. Please check your input and try again."
+      // );
+    } finally {
+      setLoading(false);
+      handleRollback()
     }
+  };
+
+  // Handle drag and drop event in the 'Choose file select section'
+  const handleDragOver = (e) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    const droppedFile = e.dataTransfer.files[0];
+    setFile(droppedFile);
+    setExtractedParams(null);
+    setFormData({});
+    setPrediction(null);
+    setError(null);
+    setSelectedFileName(droppedFile.name); // Update the selected file name
+  };
+
+  const handleRollback = () => {
+    setFile(null);
+    setExtractedParams(null);
+    setFormData({});
+    setPrediction(null);
+    setError(null);
+    setSelectedFileName(null);
   };
 
   return (
-    <div>
-      <h2>Upload Blood Report</h2>
-      <input type="file" accept=".pdf,image/*" onChange={handleFileChange} />
-      <button onClick={handleUpload}>Upload & Extract Parameters</button>
+    <div className="max-w-7xl min-h-scree mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="page-title text-3xl text-red-700 font-bold mt-10 text-center">
+        Thalassemia Detection
+      </div>
 
-      {extractedParams && (
-        <div>
-          <h3>Review and Modify Extracted Parameters</h3>
-          <form>
-            <div>
-              <label>Sex: </label>
-              <input
-                type="text"
-                name="sex"
-                value={formParams.sex || ""}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label>Hemoglobin (hb): </label>
-              <input
-                type="number"
-                step="0.1"
-                name="hb"
-                value={formParams.hb || ""}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label>PCV: </label>
-              <input
-                type="number"
-                step="0.1"
-                name="pcv"
-                value={formParams.pcv || ""}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label>RBC: </label>
-              <input
-                type="number"
-                step="0.1"
-                name="rbc"
-                value={formParams.rbc || ""}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label>MCV: </label>
-              <input
-                type="number"
-                step="0.1"
-                name="mcv"
-                value={formParams.mcv || ""}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label>MCH: </label>
-              <input
-                type="number"
-                step="0.1"
-                name="mch"
-                value={formParams.mch || ""}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label>MCHC: </label>
-              <input
-                type="number"
-                step="0.1"
-                name="mchc"
-                value={formParams.mchc || ""}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label>RDW: </label>
-              <input
-                type="number"
-                step="0.1"
-                name="rdw"
-                value={formParams.rdw || ""}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label>WBC: </label>
-              <input
-                type="number"
-                step="0.1"
-                name="wbc"
-                value={formParams.wbc || ""}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label>Neutrophils (neut): </label>
-              <input
-                type="number"
-                step="0.1"
-                name="neut"
-                value={formParams.neut || ""}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label>Lymphocytes (lymph): </label>
-              <input
-                type="number"
-                step="0.1"
-                name="lymph"
-                value={formParams.lymph || ""}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label>Platelets (plt): </label>
-              <input
-                type="number"
-                step="0.1"
-                name="plt"
-                value={formParams.plt || ""}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label>HbA: </label>
-              <input
-                type="number"
-                step="0.1"
-                name="hba"
-                value={formParams.hba || ""}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label>HbA2: </label>
-              <input
-                type="number"
-                step="0.1"
-                name="hba2"
-                value={formParams.hba2 || ""}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label>HbF: </label>
-              <input
-                type="number"
-                step="0.1"
-                name="hbf"
-                value={formParams.hbf || ""}
-                onChange={handleChange}
-              />
-            </div>
-          </form>
-          <button onClick={handlePredict}>Confirm and Predict</button>
-        </div>
-      )}
+      <Toaster toastOptions={{ duration: 4000 }} />
 
-      {predictionResult && (
-        <div>
-          <h3>Prediction Results</h3>
-          <p>
-            <strong>Prediction:</strong> {predictionResult.prediction}
-          </p>
-          <p>
-            <strong>Report ID:</strong> {predictionResult.report_id}
-          </p>
-          <pre>{JSON.stringify(predictionResult.parameters, null, 2)}</pre>
-        </div>
-      )}
+      <div className="flex justify-center items-center max-h-full py-10">
+        {extractedParams && Object.keys(extractedParams).length > 0 ? (
+          <div className="w-full max-w-5xl red-bg-gradient text-white p-10 rounded-xl shadow-lg border-2 border-red-800">
+            <h4 className="text-2xl font-extrabold mb-10 text-center">
+              Review & Update Extracted Parameters
+            </h4>
+            <form>
+              <div className="grid grid-cols-1 lg:grid-cols-3 md:grid-cols-2 gap-4 mb-4 text-lg">
+                {Object.keys(formData).length > 0 ? (
+                  Object.entries(formData).map(([key, value]) => (
+                    <div key={key}>
+                      <InputField
+                        type="text"
+                        label={key}
+                        placeholder={`Enter ${key}`}
+                        id={key}
+                        value={value}
+                        // error={key}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                  ))
+                ) : (
+                  <p>No parameters extracted.</p>
+                )}
+              </div>
+            </form>
+            <div className="flex justify-center items-center gap-4 mt-8 flex-wrap">
+              <OutlinedButton
+                type="button"
+                onClick={handlePredict}
+                disabled={loading}
+                loading={loading}
+                text="Detect"
+                w="w-48"
+              />
+
+              <button
+                type="reset"
+                className="w-48 px-6 py-2 border border-white rounded bg-gray-200 text-black hover:border-black hover:bg-gray-300 transition-all duration-300"
+                disabled={loading}
+                onClick={handleRollback}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center max-w-lg w-full mx-auto gap-4 h-[80vh]">
+            {/* Choose file select section */}
+            <div className="w-full py-8 px-12 rounded-lg border border-gray-400 border-dashed" onDragOver={handleDragOver} onDrop={handleDrop}>
+              <div className="flex flex-col gap-3 text-center">
+                <div className="flex flex-col justify-center items-center gap-0">
+                  <p className="text-xl font-semibold">Upload Blood Report</p>
+                  <p className="text-base font-medium text-gray-400">
+                    Drag & Drop your PDF Report File Here
+                  </p>
+                </div>
+                <small className="text-base font-medium text-gray-400">
+                  or
+                </small>
+                <div className="flex flex-col justify-center items-center">
+                  <input
+                    type="file"
+                    accept=".pdf,image/*"
+                    id="blood-report"
+                    onChange={handleFileChange}
+                    hidden
+                  />
+                  <label
+                    htmlFor="blood-report"
+                    className="max-w-full w-fit text-base font-semibold text-center py-1 px-8 rounded-sm text-red-500 bg-red-50 cursor-pointer"
+                  >
+                    Choose File
+                  </label>
+
+                  {/* {loading && <p>Loading...</p>} */}
+                  {error && <p style={{ color: "red" }}>{error}</p>}
+                  {selectedFileName && (
+                    <div className="w-full mt-2 flex justify-between items-center">
+                      <p className="truncate max-w-md">
+                        {selectedFileName}
+                      </p>
+                      <button
+                        onClick={handleRemoveFile}
+                        className="w-fit pl-4 text-red-500 hover:text-red-700"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Upload button */}
+            <OutlinedButton
+              type="button"
+              onClick={handleFileUpload}
+              disabled={loading}
+              loading={loading}
+              text="Upload"
+              w="w-48"
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
-}
+};
 
 export default ThalassemiaDetection;
