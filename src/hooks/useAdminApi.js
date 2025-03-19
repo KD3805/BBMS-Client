@@ -4,7 +4,6 @@ const useAdminApi = () => {
 
   const recordAdminApi = async (formData) => {
     try {
-      console.log("Payload being sent:", formData); // Debugging
       const response = await axiosInstance.post("/Admin", formData);
       return response.status === 200;
     } catch (error) {
@@ -19,9 +18,7 @@ const useAdminApi = () => {
   const checkAdminExistApi = async (Email, Password) => {
     try {
       // First check if admin already registered or not?
-      console.log("Checking login for admin:", Email, Password); // Debugging email
       const response = await axiosInstance.post("/Admin/Login", { Email, Password }, { headers: { Authorization: "" }, });
-      console.log("Admin Login Response:", response.data); // Debugging response
       return response.data.exists;
     } catch (error) {
       console.error("Error in checkAdminExistApi:", error.response?.message);

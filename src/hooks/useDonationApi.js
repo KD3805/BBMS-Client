@@ -3,7 +3,6 @@ import { axiosInstance } from "../config/axiosInstance";
 const useDonationApi = () => {
   const recordDonationApi = async (formData) => {
     try {
-      console.log("Payload being sent in Donation:", formData); // Debugging
       const response = await axiosInstance.post("/Donation", formData);
       return response.status === 200;
     } catch (error) {
@@ -16,7 +15,6 @@ const useDonationApi = () => {
 
   const updateDonationApi = async (donationID, formData) => {
     try {
-      console.log("Payload being sent in Donation Request (update):", formData); // Debugging
       const response = await axiosInstance.put(
         `/Donation/${donationID}`,
         formData

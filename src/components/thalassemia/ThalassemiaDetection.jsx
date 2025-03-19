@@ -46,7 +46,7 @@ const ThalassemiaDetection = () => {
     formData.append("file", file);
     try {
       const response = await axios.post(
-        "http://127.0.0.1:8000/upload-report/",
+        "https://thalassemia-detection.onrender.com/upload-report/",
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
@@ -78,7 +78,7 @@ const ThalassemiaDetection = () => {
     setError(null);
     try {
       const response = await axios.post(
-        "http://127.0.0.1:8000/predict-report/",
+        "https://thalassemia-detection.onrender.com/predict-report/",
         formData,
         {
           headers: { "Content-Type": "application/json" },
@@ -131,7 +131,7 @@ const ThalassemiaDetection = () => {
   };
 
   return (
-    <div className="max-w-7xl min-h-scree mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="max-w-7xl min-h-screen mx-auto px-4 sm:px-6 lg:px-8">
       <div className="page-title text-3xl text-red-700 font-bold mt-10 text-center">
         Thalassemia Detection
       </div>
@@ -155,7 +155,7 @@ const ThalassemiaDetection = () => {
                         placeholder={`Enter ${key}`}
                         id={key}
                         value={value}
-                        // error={key}
+                        error={key}
                         onChange={handleInputChange}
                       />
                     </div>
@@ -177,7 +177,7 @@ const ThalassemiaDetection = () => {
 
               <button
                 type="reset"
-                className="w-48 px-6 py-2 border border-white rounded bg-gray-200 text-black hover:border-black hover:bg-gray-300 transition-all duration-300"
+                className="cursor-pointer w-48 px-6 py-2 border border-white rounded bg-gray-200 text-black hover:border-black hover:bg-gray-300 transition-all duration-300"
                 disabled={loading}
                 onClick={handleRollback}
               >
@@ -221,12 +221,12 @@ const ThalassemiaDetection = () => {
                       <p className="truncate max-w-md">
                         {selectedFileName}
                       </p>
-                      <button
+                      {!loading && (<button
                         onClick={handleRemoveFile}
-                        className="w-fit pl-4 text-red-500 hover:text-red-700"
+                        className="w-fit pl-4 text-red-500 hover:text-red-700 cursor-pointer"
                       >
                         Remove
-                      </button>
+                      </button>)}
                     </div>
                   )}
                 </div>
@@ -234,7 +234,7 @@ const ThalassemiaDetection = () => {
             </div>
 
             {/* Upload button */}
-            <OutlinedButton
+            <FilledButton
               type="button"
               onClick={handleFileUpload}
               disabled={loading}
@@ -242,6 +242,7 @@ const ThalassemiaDetection = () => {
               text="Upload"
               w="w-48"
             />
+            {loading && <h4 className="m-0 p-0 text-base font-medium text-gray-600">It may take a while, please wait...</h4>}
           </div>
         )}
       </div>

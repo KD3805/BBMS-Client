@@ -101,7 +101,7 @@ const OutlinedButton = ({
     type={type}
     onClick={onClick}
     disabled={disabled} // Disable button during loading or if OTP expired
-    className={`flex items-center font-bold justify-center ${w} h-10 px-6 py-2 rounded shadow focus:outline-none  transition-all duration-300 ${loading
+    className={`cursor-pointer flex items-center font-bold justify-center ${w} h-10 px-6 py-2 rounded shadow focus:outline-none  transition-all duration-300 ${loading
       ? "bg-gray-300 cursor-not-allowed"
       : "bg-white border-2 border-red-700 text-red-700 hover:bg-red-400 hover:text-white hover:border-none"
       }`}
@@ -122,10 +122,10 @@ const FilledButton = ({
     type={type}
     onClick={onClick}
     disabled={disabled}
-    className={`flex items-center font-bold justify-center ${w} h-10 px-6 py-2 rounded shadow focus:outline-none transition-all duration-300 
+    className={`cursor-pointer flex items-center font-bold justify-center ${w} h-10 px-6 py-2 rounded shadow focus:outline-none transition-all duration-300 
       ${loading
         ? "bg-gray-300 cursor-not-allowed"
-        : "border-2 border-red-700 bg-red-600 text-white hover:bg-red-700  hover:border-none"
+        : "border-2 border-red-500 bg-red-500 text-white hover:bg-red-700  hover:border-none"
       }`}
   >
     {loading ? <CgSpinner size={20} className="animate-spin" /> : text}

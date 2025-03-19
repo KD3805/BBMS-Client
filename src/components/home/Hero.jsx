@@ -20,7 +20,7 @@ const Hero = () => {
             <button onClick={() => nav("/DonorLogin")} className="bg-white text-red-600 px-8 py-3 rounded-full font-semibold hover:bg-red-50 transition-colors">
               Donate Now
             </button>
-            <button className="border-2 border-white text-white px-8 py-3 rounded-full font-semibold hover:bg-white/10 transition-colors">
+            <button onClick={() => nav("/RecipientLogin")} className="border-2 border-white text-white px-8 py-3 rounded-full font-semibold hover:bg-white/10 transition-colors">
               Request Blood
             </button>
           </div>

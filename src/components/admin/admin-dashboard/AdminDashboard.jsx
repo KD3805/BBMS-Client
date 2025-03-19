@@ -4,6 +4,7 @@ import { IoMenu, IoClose } from "react-icons/io5";
 import '../../../DashboardStyle.css'
 import { useAdminStore } from '../../../zustand/store';
 import { OutlinedButton } from '../../custom/CustomComponents';
+import GraphAndStats from './GraphAndStats';
 
 // Lazy-load components
 const AdminProfile = lazy(() => import("./AdminProfile"))

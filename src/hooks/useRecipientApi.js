@@ -4,7 +4,6 @@ const useRecipientApi = () => {
   
   const recordRecipientApi = async (formData) => {
     try {
-      console.log("Payload being sent:", formData); // Debugging
       const response = await axiosInstance.post("/Recipient", formData);
       return response.status === 200;
     } catch (error) {
@@ -44,7 +43,6 @@ const useRecipientApi = () => {
 
   const updateRecipientApi = async (recipientID, formData) => {
     try {
-      console.log("Payload being sent in Recipient Request (update):", formData); // Debugging
       const response = await axiosInstance.put(`/Recipient/${recipientID}`, formData);
       return response.status === 200;
     } catch (error) {
@@ -59,7 +57,6 @@ const useRecipientApi = () => {
   const checkRecipientExistApi = async (email) => {
     try {
       // First check if recipient already registered or not?
-      console.log("Checking login for recipient:", email); // Debugging email
       const response = await axiosInstance.post("/Recipient/Email", { email });
       console.log("Recipient Login Response:", response); // Debugging response
       return response.data.exists;

@@ -4,7 +4,6 @@ const useBloodStockApi = () => {
 
   const recordBloodStockApi = async (formData) => {
     try {
-      console.log("Payload being sent:", formData);
       const response = await axiosInstance.post("/BloodStock", formData);
       return response.status === 200;
     } catch (error) {
@@ -44,7 +43,6 @@ const useBloodStockApi = () => {
 
   const updateBloodStockApi = async (bloodStockID, formData) => {
     try {
-      console.log("Payload being sent in BloodStock Request (update):", formData);
       const response = await axiosInstance.put(`/BloodStock/${bloodStockID}`, formData);
       // Accept both 200 and 204 as successful responses
       return response.status === 200 || response.status === 204;

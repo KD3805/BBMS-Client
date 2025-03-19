@@ -4,7 +4,6 @@ const useBloodRequestApi = () => {
 
   const recordBloodRequestApi = async (formData) => {
     try {
-      console.log("Payload being sent in BloodRequest:", formData); // Debugging
       const response = await axiosInstance.post("/BloodRequest", formData);
       return response.status === 200;
     } catch (error) {
@@ -18,7 +17,6 @@ const useBloodRequestApi = () => {
 
   const updateBloodRequestApi = async (bloodRequestID, formData) => {
     try {
-      console.log("Payload being sent in BloodRequest Request (update):", formData); // Debugging
       const response = await axiosInstance.put(`/BloodRequest/${bloodRequestID}`, formData);
       return response.status === 200;
     } catch (error) {
@@ -86,7 +84,6 @@ const useBloodRequestApi = () => {
   // Updated function to update bloodRequest status
   const updateBloodRequestStatusApi = async (RequestID, NewStatus) => {
     try {
-      console.log("updateBloodRequestStatusApi:", RequestID, NewStatus);
       const response = await axiosInstance.put(`/BloodRequest/UpdateStatus/${RequestID}`, {
         RequestID,
         NewStatus
