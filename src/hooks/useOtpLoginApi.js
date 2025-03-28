@@ -30,9 +30,37 @@ const useOtpLoginApi = () => {
     }
   };
 
+  const verifyOtpDonorSignupApi = async (email, otp) => {
+    try {
+      const response = await axiosInstance.post("/Otp/VerifyOTP/Donor/Signup", 
+        { Email: email, OtpCode: otp }, 
+        { headers: { Authorization: "" } }
+      );
+      return response.data;
+    } catch (error) {
+      throw new Error(
+        error.response?.data?.message || "Invalid or expired OTP. Please try again."
+      );
+    }
+  };
+
   const verifyOtpRecipientLoginApi = async (email, otp) => {
     try {
       const response = await axiosInstance.post("/Otp/VerifyOTP/Recipient/Login", 
+        { Email: email, OtpCode: otp }, 
+        { headers: { Authorization: "" } 
+      });
+      return response.data;
+    } catch (error) {
+      throw new Error(
+        error.response?.data?.message || "Invalid or expired OTP. Please try again."
+      );
+    }
+  };
+
+  const verifyOtpRecipientSignupApi = async (email, otp) => {
+    try {
+      const response = await axiosInstance.post("/Otp/VerifyOTP/Recipient/Signup", 
         { Email: email, OtpCode: otp }, 
         { headers: { Authorization: "" } 
       });
@@ -58,7 +86,21 @@ const useOtpLoginApi = () => {
     }
   };
 
-  return { sendOtpApi, verifyOtpDonorLoginApi, verifyOtpRecipientLoginApi, verifyOtpAdminLoginApi };
+  const verifyOtpAdminSignupApi = async (email, otp) => {
+    try {
+      const response = await axiosInstance.post("/Otp/VerifyOTP/Admin/Signup", 
+        { Email: email, OtpCode: otp }, 
+        { headers: { Authorization: "" } 
+      });
+      return response.data;
+    } catch (error) {
+      throw new Error(
+        error.response?.data?.message || "Invalid or expired OTP. Please try again."
+      );
+    }
+  };
+
+  return { sendOtpApi, verifyOtpDonorLoginApi, verifyOtpRecipientLoginApi, verifyOtpAdminLoginApi, verifyOtpAdminSignupApi, verifyOtpRecipientSignupApi, verifyOtpDonorSignupApi };
 };
 
 export default useOtpLoginApi

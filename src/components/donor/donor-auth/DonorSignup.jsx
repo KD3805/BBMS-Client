@@ -39,7 +39,7 @@ const DonorSignup = () => {
 
   // Custom hook to manage API calls
   const { recordDonorApi, checkDonorExistApi } = useDonorApi();
-  const { sendOtpApi, verifyOtpDonorLoginApi } = useOtpLoginApi();
+  const { sendOtpApi, verifyOtpDonorSignupApi } = useOtpLoginApi();
 
   // Handle form submission
   const handleFormSubmit = async (e) => {
@@ -81,7 +81,7 @@ const DonorSignup = () => {
   const handleOtpSubmit = async (otp) => {
     try {
       setLoading(true);
-      const otpVerified = await verifyOtpDonorLoginApi(formData.Email, otp); // Verify OTP
+      const otpVerified = await verifyOtpDonorSignupApi(formData.Email, otp); // Verify OTP
       if (otpVerified) {
         // Record donor data to backend only after OTP is verified
         await recordDonorApi(formData);
@@ -90,7 +90,7 @@ const DonorSignup = () => {
 
         setLoggedDonor(formData); // set donor details to store for global use
 
-        navigate("/DonorDashboard");
+        navigate("/DonorLogin");
       }
     } catch (error) {
       toast.error(error.message || "Error verifying OTP or registering donor. Please try again.");

@@ -40,7 +40,7 @@ const RecipientSignup = () => {
 
   // Custom hook to manage API calls
   const { recordRecipientApi, checkRecipientExistApi } = useRecipientApi();
-  const { sendOtpApi, verifyOtpRecipientLoginApi } = useOtpLoginApi();
+  const { sendOtpApi, verifyOtpRecipientSignupApi } = useOtpLoginApi();
 
   // Handle form submission
   const handleFormSubmit = async (e) => {
@@ -82,7 +82,7 @@ const RecipientSignup = () => {
   const handleOtpSubmit = async (otp) => {
     try {
       setLoading(true);
-      const otpVerified = await verifyOtpRecipientLoginApi(formData.Email, otp); // Verify OTP
+      const otpVerified = await verifyOtpRecipientSignupApi(formData.Email, otp); // Verify OTP
       if (otpVerified) {
         // Record recipient data to backend only after OTP is verified
         await recordRecipientApi(formData);
@@ -91,7 +91,7 @@ const RecipientSignup = () => {
 
         setLoggedRecipient(formData); // set recipient details to store for global use
 
-        navigate("/");
+        navigate("/RecipientLogin");
       }
     } catch (error) {
       toast.error(error.message || "Error verifying OTP or registering recipient. Please try again.");
